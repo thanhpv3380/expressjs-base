@@ -4,7 +4,7 @@ const compression = require('compression');
 const cors = require('cors');
 const helmet = require('helmet');
 
-const { logReq } = require('./middlewares/log');
+const { logReq, logRes } = require('./middlewares/log');
 const camelCaseReq = require('./middlewares/camelCaseReq');
 const omitReq = require('./middlewares/omitReq');
 const errorHandler = require('./middlewares/errorHandler');
@@ -28,10 +28,8 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(logReq);
 app.use(camelCaseReq);
 app.use(omitReq);
-
-require('./routes')(app);
-
-app.use(errorHandler);
+// require('./routes')(app);
+app.use(logRes);
 
 app.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);

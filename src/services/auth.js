@@ -27,7 +27,7 @@ const verifyAccessToken = async (accessToken) => {
 };
 
 const login = async () => {
-  return 1;
+  throw new CustomError(errorCodes.BAD_REQUEST);
 };
 
 module.exports = {

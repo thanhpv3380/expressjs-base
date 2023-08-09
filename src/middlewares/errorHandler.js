@@ -3,10 +3,11 @@ const codes = require('../errors/code');
 const getErrorMessage = require('../errors/message');
 
 // eslint-disable-next-line no-unused-vars
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err) => {
   let statusCode = err.code || err.statusCode;
   let { message } = err;
   let details;
+
   const code = err.code || err.statusCode || codes.INTERNAL_SERVER_ERROR;
   switch (code) {
     case codes.BAD_REQUEST:
@@ -33,16 +34,11 @@ const errorHandler = (err, req, res, next) => {
       message = message || getErrorMessage(code);
       statusCode = codes.BAD_REQUEST;
   }
-  return res.status(statusCode).send(
-    camelcaseKeys(
-      {
-        code,
-        message,
-        details,
-      },
-      { deep: true },
-    ),
-  );
+
+  return {
+    statusCode,
+    data: camelcaseKeys({ status: 0, code, message, details }, { deep: true }),
+  };
 };
 
 module.exports = errorHandler;

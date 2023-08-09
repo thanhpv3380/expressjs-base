@@ -7,7 +7,6 @@ const CustomError = require('../errors/CustomError');
 const errorCodes = require('../errors/code');
 
 const authService = require('../services/auth');
-const portalService = require('../services/portal');
 
 const auth = async (req, res, next) => {
   const { authorization } = req.headers;
