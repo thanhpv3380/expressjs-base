@@ -1,19 +1,25 @@
-const { ObjectId } = require('mongoose').Types;
 const User = require('../models/user');
 
-const createUser = async ({ email, name, password }) => {
-  const user = await User.create({ email, name, password });
+const createUser = async (data) => {
+  const user = await User.create(data);
   return user;
 };
 
-const findUser = async (condition) => {
-  if (ObjectId.isValid(condition)) {
-    const user = await User.findById(condition);
+const findUser = async (condition, includePassword) => {
+  // const options = {
+  //   attributes: { exclude: !includePassword ? ['password'] : [] },
+  // };
+  // if (!includePassword) {
+
+  // }
+
+  if (typeof condition === 'number') {
+    const user = await User.findByPk(condition);
     return user;
   }
 
-  if (typeof condition === 'object' && condition !== null) {
-    const user = await User.findOne(condition);
+  if (typeof condition === 'object' && condition == null) {
+    const user = await User.findOne({ where: condition });
     return user;
   }
 

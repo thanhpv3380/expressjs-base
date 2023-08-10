@@ -16,4 +16,21 @@ log4js.configure({
   },
 });
 
-module.exports = log4js;
+const logger = log4js.getLogger();
+
+const loggerCustom = {
+  info: (message, requestId) => {
+    const modifiedMessage = requestId ? `[${requestId}] ${message}` : message;
+    logger.info(modifiedMessage);
+  },
+  warning: (message, requestId) => {
+    const modifiedMessage = requestId ? `[${requestId}] ${message}` : message;
+    logger.warn(modifiedMessage);
+  },
+  error: (message, requestId) => {
+    const modifiedMessage = requestId ? `[${requestId}] ${message}` : message;
+    logger.error(modifiedMessage);
+  },
+};
+
+module.exports = loggerCustom;

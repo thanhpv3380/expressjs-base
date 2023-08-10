@@ -1,7 +1,5 @@
-// eslint-disable-next-line consistent-return
 const asyncMiddleware =
   (...fns) =>
-  // eslint-disable-next-line consistent-return
   async (req, res, next) => {
     try {
       req.hasUri = true;
@@ -11,12 +9,12 @@ const asyncMiddleware =
         result = await fn(req, res, next);
       }
 
-      console.log('sdfsd');
-      next(null, result);
+      res.data = result;
     } catch (error) {
-      console.log('sdfsd');
-      next(error, null);
+      res.error = error;
     }
+
+    next();
   };
 
 module.exports = asyncMiddleware;
