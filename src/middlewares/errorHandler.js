@@ -3,7 +3,7 @@ const codes = require('../errors/code');
 const getErrorMessage = require('../errors/message');
 
 // eslint-disable-next-line no-unused-vars
-const errorHandler = (err) => {
+const errorHandler = (err, req, res, next) => {
   let statusCode = err.code || err.statusCode;
   let { message } = err;
   let details;
@@ -35,10 +35,23 @@ const errorHandler = (err) => {
       statusCode = codes.BAD_REQUEST;
   }
 
-  return {
-    statusCode,
-    data: camelcaseKeys({ status: 0, code, message, details }, { deep: true }),
-  };
+  const { requestId, requestTime, method, url } = req;
+  const responseTime = new Date().getTime();
+  const tookTime = responseTime - requestTime;
+
+  const errorData = camelcaseKeys(
+    { status: 0, code, message, details },
+    { deep: true },
+  );
+
+  logger.info(
+    `[RESPONSE][${method}][${url}] status: FAILED - statusCode: ${statusCode} - data: ${JSON.stringify(
+      errorData,
+    )} - took: ${tookTime}`,
+    requestId,
+  );
+
+  return res.status(statusCode).send(errorData);
 };
 
 module.exports = errorHandler;

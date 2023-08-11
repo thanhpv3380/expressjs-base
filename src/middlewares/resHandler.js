@@ -1,38 +1,26 @@
-/* eslint-disable consistent-return */
-/* eslint-disable prefer-const */
-const errorHandler = require('./errorHandler');
+const camelcaseKeys = require('camelcase-keys');
 const errorCodes = require('../errors/code');
 
-const resHandler = (req, res) => {
-  console.log('Res', res.data);
-  // let { error, data: resData } = res;
-  // const { requestId, requestTime, hasUri, method, url } = req;
+const resHandler = (req, res, next) => {
+  const { data: resData } = res;
+  const { requestId, requestTime, hasUri, method, url } = req;
+  const responseTime = new Date().getTime();
+  const tookTime = responseTime - requestTime;
 
-  // const responseTime = new Date().getTime();
-  // const tookTime = responseTime - requestTime;
+  if (!hasUri) {
+    return next({ statusCode: errorCodes.NOT_FOUND });
+  }
 
-  // if (!hasUri) error = { code: errorCodes.NOT_FOUND };
+  logger.info(
+    `[RESPONSE][${method}][${url}] status: SUCCESS - data: ${JSON.stringify(
+      resData,
+    )} - took: ${tookTime}`,
+    requestId,
+  );
 
-  // if (error) {
-  //   const { statusCode, data: errorData } = errorHandler(error);
-  //   logger.info(
-  //     `[RESPONSE][${method}][${url}] status: FAILED - statusCode: ${statusCode} - data: ${JSON.stringify(
-  //       errorData,
-  //     )} - took: ${tookTime}`,
-  //     requestId,
-  //   );
-
-  //   return res.status(statusCode).send(errorData);
-  // }
-
-  // logger.info(
-  //   `[RESPONSE][${method}][${url}] status: SUCCESS - data: ${JSON.stringify(
-  //     resData,
-  //   )}`,
-  //   requestId,
-  // );
-
-  // return res.send({ status: 1, result: resData });
+  return res.send(
+    camelcaseKeys({ status: 1, result: resData }, { deep: true }),
+  );
 };
 
 module.exports = resHandler;

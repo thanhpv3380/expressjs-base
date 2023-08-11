@@ -6,10 +6,11 @@ const { auth } = require('../middlewares/auth');
 
 const { loginValidate, registerValidate } = require('../validations/auth');
 
-router.post('/login', asyncMiddleware(loginValidate, authController.login));
+router.post('/login', loginValidate, asyncMiddleware(authController.login));
 router.post(
   '/register',
-  asyncMiddleware(registerValidate, authController.register),
+  registerValidate,
+  asyncMiddleware(authController.register),
 );
 router.post(
   '/verifyAccessToken',

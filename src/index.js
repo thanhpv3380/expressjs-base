@@ -6,6 +6,7 @@ const helmet = require('helmet');
 
 const reqHandler = require('./middlewares/reqHandler');
 const resHandler = require('./middlewares/resHandler');
+const errorHandler = require('./middlewares/errorHandler');
 
 require('dotenv').config();
 
@@ -29,6 +30,7 @@ app.use(reqHandler);
 require('./routes')(app);
 
 app.use(resHandler);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);
