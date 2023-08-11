@@ -1,34 +1,30 @@
 const User = require('../models/user');
 
-const createUser = async (data) => {
-  const user = await User.create(data);
+const findUser = async (condition, includePassword) => {
+  let user = null;
+
+  if (typeof condition === 'number') {
+    user = await User.findByPk(condition);
+  } else if (typeof condition === 'object' && condition != null) {
+    user = await User.findOne({ where: condition });
+  }
+
+  if (user) {
+    user = user.get();
+    if (!includePassword) delete user.password;
+  }
+
   return user;
 };
 
-const findUser = async (condition, includePassword) => {
-  // const options = {
-  //   attributes: { exclude: !includePassword ? ['password'] : [] },
-  // };
-  // if (!includePassword) {
-
-  // }
-
-  if (typeof condition === 'number') {
-    const user = await User.findByPk(condition);
-    return user;
-  }
-
-  if (typeof condition === 'object' && condition == null) {
-    const user = await User.findOne({ where: condition });
-    return user;
-  }
-
-  return null;
+const createUser = async (data) => {
+  const user = await User.create(data);
+  return user.get();
 };
 
 const updateUser = async (userId, data) => {
   const user = await User.findByIdAndUpdate(userId, data, { new: true });
-  return user;
+  return user.get();
 };
 
 const deleteUser = async (userId) => {

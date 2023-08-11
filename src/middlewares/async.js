@@ -1,3 +1,9 @@
+const handleSequenceFunc = async (fn) => {
+  return new Promise((resolve) => {
+    resolve(fn);
+  });
+};
+
 const asyncMiddleware =
   (...fns) =>
   async (req, res, next) => {
@@ -6,15 +12,15 @@ const asyncMiddleware =
 
       let result;
       for (const fn of fns) {
-        result = await fn(req, res, next);
+        result = await handleSequenceFunc(fn(req, res, next));
       }
 
+      console.log('xxx');
       res.data = result;
+      next();
     } catch (error) {
-      res.error = error;
+      next(error);
     }
-
-    next();
   };
 
 module.exports = asyncMiddleware;

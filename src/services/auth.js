@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 
 const CustomError = require('../errors/CustomError');
 const errorCodes = require('../errors/code');
 const { JWT_SECRET_KEY } = require('../configs');
 
 const userDao = require('../daos/user');
+const { compareBcrypt, generateSalt, hashBcrypt } = require('../utils/encrypt');
 
 const generateAccessToken = async (user) => {
   const accessToken = await jwt.sign(
@@ -24,52 +24,15 @@ const generateAccessToken = async (user) => {
 };
 
 const login = async ({ username, password }) => {
-  const user = await userDao.findUser({ username }, true);
+  const user = await userDao.findUser({ username, active: 1 }, true);
   if (!user) throw new CustomError(errorCodes.USER_NOT_FOUND);
 
   const isCorrectPassword = await compareBcrypt(password, user.password);
   if (!isCorrectPassword) throw new CustomError(errorCodes.WRONG_PASSWORD);
 
   const accessToken = await generateAccessToken(user);
-
+  delete user.password;
   return { user, accessToken };
-};
-
-const verifyAccessToken = async (accessToken) => {
-  const data = await jwt.verify(accessToken, JWT_SECRET_KEY);
-
-  const { user: userInToken } = data;
-  if (!userInToken || !userInToken.id)
-    throw new CustomError(errorCodes.UNAUTHORIZED);
-
-  const user = await userDao.findUser(user.id);
-  if (!user) throw new CustomError(errorCodes.USER_NOT_FOUND);
-
-  return user;
-};
-
-const generateSalt = (rounds) => {
-  return bcrypt.genSaltSync(rounds);
-};
-
-const hashBcrypt = (text, salt) => {
-  const hashedBcrypt = new Promise((resolve, reject) => {
-    bcrypt.hash(text, salt, (err, hash) => {
-      if (err) reject(err);
-      resolve(hash);
-    });
-  });
-  return hashedBcrypt;
-};
-
-const compareBcrypt = async (data, hashed) => {
-  const isCorrect = await new Promise((resolve, reject) => {
-    bcrypt.compare(data, hashed, (err, same) => {
-      if (err) reject(err);
-      resolve(same);
-    });
-  });
-  return isCorrect;
 };
 
 const register = async ({
@@ -106,8 +69,24 @@ const register = async ({
   return { user, accessToken };
 };
 
+const verifyAccessToken = async (accessToken) => {
+  const data = await jwt.verify(accessToken, JWT_SECRET_KEY);
+
+  const { user: userInToken } = data;
+  if (!userInToken || !userInToken.id)
+    throw new CustomError(errorCodes.UNAUTHORIZED);
+
+  const user = await userDao.findUser({
+    id: userInToken.id,
+    active: 1,
+  });
+  if (!user) throw new CustomError(errorCodes.USER_NOT_FOUND);
+
+  return user;
+};
+
 module.exports = {
-  verifyAccessToken,
   login,
   register,
+  verifyAccessToken,
 };
