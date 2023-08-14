@@ -1,5 +1,5 @@
 {
-  "name": "vaccine-management-api",
+  "name": "expressjs-base",
   "version": "1.0.0",
   "scripts": {
     "start": "node src/index.js",
